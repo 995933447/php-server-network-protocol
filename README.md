@@ -34,8 +34,8 @@ public function getBufferLength(): int;
 获取剩余尚未解析的字符串。\
 public function getBuffer(): string;
 
-###不同解析器之间的微小不同:
-####构造函数：
+### 不同解析器之间的微小不同:
+#### 构造函数：
 Bobby\ServerNetworkProtocol\Tcp\Parser::__construct(array $decodeOptions = [])\
 当什么选项都不设置代表不解析数据直接返回原生字符串。可设置选项:\
 **open_eof_split** ***boolean*** 是否开启结束符检测,和open_length_check只能同时开启其中一个。\
