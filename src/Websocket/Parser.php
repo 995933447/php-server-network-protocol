@@ -103,15 +103,7 @@ class Parser implements ParserContract
             }
         }
 
-        $frame = new Frame();
-        $frame->finWith3Rsv = $finWith3Rsv;
-        $frame->isMasked = $isMasked;
-        $frame->opcode = $opcode;
-        $frame->payloadLen = $payloadLen;
-        $frame->maskingKey = $maskingKey;
-        $frame->payloadData = $payloadData;
-
-        return $frame;
+        return new Frame($finWith3Rsv, $opcode, $isMasked, $payloadLen, $maskingKey, $payloadData);
     }
 
     public function getBuffer(): string
