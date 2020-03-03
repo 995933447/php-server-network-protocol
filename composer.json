@@ -1,5 +1,5 @@
 {
-    "name": "bobby/network-protocol",
+    "name": "bobby/server-network-protocol",
     "description": "Server network protocol parsers",
     "type": "library",
     "require": {
