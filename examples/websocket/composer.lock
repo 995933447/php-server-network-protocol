@@ -1,0 +1,53 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+        "This file is @generated automatically"
+    ],
+    "content-hash": "a0844853501d6f04bbe0cd77dad1c242",
+    "packages": [
+        {
+            "name": "bobby/multi-processes",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/995933447/multi-processes-component.git",
+                "reference": "e1e1e9a12271a7600898c46f05c6927844622220"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/995933447/multi-processes-component/zipball/e1e1e9a12271a7600898c46f05c6927844622220",
+                "reference": "e1e1e9a12271a7600898c46f05c6927844622220",
+                "shasum": ""
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Bobby\\MultiProcesses\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "bobby",
+                    "email": "995933447@qq.com"
+                }
+            ],
+            "description": "php原生pcntl实现的简易多进程和进程池组件,提供进程间通信传输数据功能.包含进程池按需动态fork进程功能.",
+            "time": "2020-02-06T01:32:07+00:00"
+        }
+    ],
+    "packages-dev": [],
+    "aliases": [],
+    "minimum-stability": "dev",
+    "stability-flags": {
+        "bobby/multi-processes": 20
+    },
+    "prefer-stable": false,
+    "prefer-lowest": false,
+    "platform": [],
+    "platform-dev": []
+}

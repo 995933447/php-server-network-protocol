@@ -1,0 +1,20 @@
+{
+    "name": "bobby/phpwebsocket",
+    "description": "php原生socket函数和s实现的稳定的websocket服务器框架",
+    "type": "library",
+    "minimum-stability": "dev",
+    "authors": [
+        {
+            "name": "Bobby",
+            "email": "995933447@qq.com"
+        }
+    ],
+    "require": {
+        "bobby/multi-processes": "dev-master"
+    },
+    "autoload": {
+      "psr-4": {
+        "Bobby\\Websocket\\": "src/"
+      }
+    }
+}
