@@ -93,7 +93,7 @@ Bobby\ServerNetworkProtocol\Http\Request包含以下属性和方法:
 ***public function compressToEnv()***\
 将相关属性的值设置到$_SERVER,$_GET,$_POST,$_REQUEST,$GLOBALS以及$_FILES。
 
-Bobby\ServerNetworkProtocol\Websocket\Parser::decode()\
+***Bobby\ServerNetworkProtocol\Websocket\Parser::decode()***\
 返回一个Bobby\ServerNetworkProtocol\Websocket\Frame对象数组。Bobby\ServerNetworkProtocol\Websocket\Frame对象是websocket数据帧的值对象。通过$frame->payloadData可获取传入数据帧承载的数据。
 ### 示例：
 ```php
