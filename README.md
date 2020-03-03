@@ -12,31 +12,31 @@ Bobby\ServerNetworkProtocol\Websocket\Parser\
 \
 以上解析器均实现了Bobby\ServerNetworkProtocol\ParserContract接口，暴露以下调用方法：\
 \
+**public function __construct(array $decodeOptions = []);**\
 构造函数，传入解析选项构成解析上下文\
-public function __construct(array $decodeOptions = []);\
 参数列表:\
 $decodeOptions 可选。解析选项。
 
+**public function input(string $buffer);**\
 输入需要解析原生字符串:\
-public function input(string $buffer);
 参数列表:\
 $buffer 要解析的原生字符串。
 
+**public function decode(): array;**\
 解析已输入的原生字符串,返回解析结果数组,如解析出多个合法消息则返回包含多个消息的数组。\
-public function decode(): array;
 
-清除未解析的字符串缓冲区，调用后未解析的字符串将被清除。\
-public function clearBuffer();
+**public function clearBuffer();**\
+清除未解析的字符串缓冲区，调用后未解析的字符串将被清除。
 
-获取剩余尚未解析的字符串长度。\
-public function getBufferLength(): int;
+**public function getBufferLength(): int;**\
+获取剩余尚未解析的字符串长度。
 
-获取剩余尚未解析的字符串。\
-public function getBuffer(): string;
+**public function getBuffer(): string;**\
+获取剩余尚未解析的字符串。
 
 ### 不同解析器之间的微小不同:
 #### 构造函数：
-Bobby\ServerNetworkProtocol\Tcp\Parser::__construct(array $decodeOptions = [])\
+**Bobby\ServerNetworkProtocol\Tcp\Parser::__construct(array $decodeOptions = [])**\
 当什么选项都不设置代表不解析数据直接返回原生字符串。可设置选项:\
 **open_eof_split** ***boolean*** 是否开启结束符检测,和open_length_check只能同时开启其中一个。\
 **package_eof** ***string*** 消息结束符。根据该结束符检测消息边界。\
@@ -47,19 +47,19 @@ Bobby\ServerNetworkProtocol\Tcp\Parser::__construct(array $decodeOptions = [])\
 **package_max_length** ***int*** 每条消息的最大长度。仅当open_eof_split或open_length_check为true时有效。\
 **cat_exceed_package** ***boolean*** 当消息超过设置的最大长度时候是否裁剪消息。默认值是false。如果值为false，当消息超出最大长度时候将返回null。
 
-Bobby\ServerNetworkProtocol\Http\Parser::__construct(array $decodeOptions = [])\
+**Bobby\ServerNetworkProtocol\Http\Parser::__construct(array $decodeOptions = [])**\
 什么都不设置代表无以下限制。可设置选项:\
 **follow_ini** ***boolean*** 是否根据php.ini配置进行数据解析。
 **max_package_size** ***int***  数据包的最大长度，超出该初度将抛出异常。
 
-Bobby\ServerNetworkProtocol\Websocket\Parser::__construct(array $decodeOptions = [])\
+**Bobby\ServerNetworkProtocol\Websocket\Parser::__construct(array $decodeOptions = [])**\
 没有可用选项设置。
 
 #### 解析方法:
-Bobby\ServerNetworkProtocol\Tcp\Parser::decode()\
+**Bobby\ServerNetworkProtocol\Tcp\Parser::decode()**\
 返回经过根据传入构造函数选项解析出来的完整的字符串的数组。
 
-Bobby\ServerNetworkProtocol\Http\Parser::decode()\
+**Bobby\ServerNetworkProtocol\Http\Parser::decode()**\
 返回一个Bobby\ServerNetworkProtocol\Http\Request对象数组，对象里包含所有Http请求的相关信息。\
 Bobby\ServerNetworkProtocol\Http\Request包含以下属性和方法:
 
