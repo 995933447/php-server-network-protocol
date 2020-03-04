@@ -30,9 +30,25 @@ class Parser implements ParserContract
 
     protected $receiveBuffer = '';
 
+    protected $optionItems = [
+        'open_eof_split',
+        'open_length_check',
+        'package_eof',
+        'package_length_type',
+        'package_length_offset',
+        'package_body_offset',
+        'package_max_length',
+        'cat_exceed_package'
+    ];
+
     public function __construct(array $decodeOptions = [])
     {
         $this->setDecodeContext($decodeOptions);
+    }
+
+    public function getOptionItems(): array
+    {
+        return $this->optionItems;
     }
 
     protected function setDecodeContext(array $decodeOptions)

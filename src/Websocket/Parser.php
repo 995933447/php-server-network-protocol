@@ -13,6 +13,11 @@ class Parser implements ParserContract
     {
     }
 
+    public function getOptionItems(): array
+    {
+        return [];
+    }
+
     public function input(string $buffer)
     {
         $this->receiveBuffer .= $buffer;
