@@ -15,16 +15,16 @@ class Parser implements ParserContract
 
     protected $allowHttpMethods = ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'CONNECT', 'PATCH', 'HEAD'];
 
-    protected $optionItems = ['follow_ini', 'max_package_size'];
+    protected static $optionItems = ['follow_ini', 'max_package_size'];
 
     public function __construct(array $decodeOptions = [])
     {
         $this->createDecodeContext($decodeOptions);
     }
 
-    public function getOptionItems(): array
+    public static function getOptionItems(): array
     {
-        return $this->optionItems;
+         return static::$optionItems;
     }
 
     protected function createDecodeContext($decodeOptions)

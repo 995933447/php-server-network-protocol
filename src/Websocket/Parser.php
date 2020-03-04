@@ -13,7 +13,7 @@ class Parser implements ParserContract
     {
     }
 
-    public function getOptionItems(): array
+    public static function getOptionItems(): array
     {
         return [];
     }

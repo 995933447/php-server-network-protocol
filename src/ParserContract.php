@@ -3,7 +3,7 @@ namespace Bobby\ServerNetworkProtocol;
 
 interface ParserContract
 {
-    public function getOptionItems(): array;
+    public static function getOptionItems(): array;
 
     public function __construct(array $decodeOptions = []);
 

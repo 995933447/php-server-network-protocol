@@ -30,7 +30,7 @@ class Parser implements ParserContract
 
     protected $receiveBuffer = '';
 
-    protected $optionItems = [
+    protected static $optionItems = [
         'open_eof_split',
         'open_length_check',
         'package_eof',
@@ -46,9 +46,9 @@ class Parser implements ParserContract
         $this->setDecodeContext($decodeOptions);
     }
 
-    public function getOptionItems(): array
+    public static function getOptionItems(): array
     {
-        return $this->optionItems;
+        return static::$optionItems;
     }
 
     protected function setDecodeContext(array $decodeOptions)
