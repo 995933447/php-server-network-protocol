@@ -1,5 +1,5 @@
 <?php
-namespace Bobby\ServerNetworkProtocol\Http;
+namespace Bobby\ServerNetworkProtocol;
 
 use InvalidArgumentException;
 
