@@ -282,15 +282,18 @@ class Parser implements ParserContract
             }
 
             if (isset($parsedBufferHeader['filename'])) {
-                if ($this->followIni && PhpIniUtil::checkUploadedBodyExceed($bufferValue)) {
-                    throw new HttpPackageTooLongException("Uploaded file size exceed.");
-                }
-
                 $request->files[$parsedBufferHeader['name']] = [
                     'filename' => $parsedBufferHeader['filename'],
                     'size' => strlen($bufferValue),
                     'content' => trim($bufferValue)
                 ];
+
+                if ($this->followIni && PhpIniUtil::checkUploadedBodyExceed($bufferValue)) {
+                    $request->files[$parsedBufferHeader['name']]['error'] = UPLOAD_ERR_INI_SIZE;
+                } else {
+                    $request->files[$parsedBufferHeader['name']]['error'] = UPLOAD_ERR_OK;
+                }
+
                 if (isset($parsedBufferHeader['type'])) {
                     $request->files[$parsedBufferHeader['name']]['type'] = $parsedBufferHeader['type'];
                 }
