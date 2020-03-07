@@ -11,14 +11,23 @@ class HttpParserTest extends \PHPUnit\Framework\TestCase
         $parser = new \Bobby\ServerNetworkProtocol\Http\Parser($options);
         $formData = <<<str
 --boundary
+Content-Disposition: form-data; name="MAX_FILE_SIZE"
+
+8
+--boundary
 Content-Disposition: form-data; name="field"
 
 value1
 --boundary
-Content-Disposition: form-data; name="file"; filename="example.txt"
+Content-Disposition: form-data; name="file1"; filename="example.txt"
 Content-Type: plain/text
 
 value2
+--boundary
+Content-Disposition: form-data; name="file2"; filename="example.txt"
+Content-Type: plain/text
+
+value2222
 --boundary--
 str;
         $formDataLength = strlen($formData);
