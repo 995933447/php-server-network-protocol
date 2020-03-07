@@ -233,6 +233,8 @@ class Parser implements ParserContract
 
         if (!isset($request->server['REQUEST_METHOD'])) {
             throw new InvalidArgumentException('You need to parse http method first.');
+        } else if ($request->server['REQUEST_METHOD'] !== 'POST') {
+            return;
         }
 
         if (!preg_match('/boundary="*?([^"]+)"*?/', $request->server['HTTP_CONTENT_TYPE'], $match)) {
@@ -242,12 +244,15 @@ class Parser implements ParserContract
         $body = substr($body, 0, -1 * (strlen($boundary = $match[1]) + 4));
         $bodyComponents = explode("--" . $boundary . "\r\n", $body);
 
+        $htmlMaxFileSize = null;
+        $files = [];
         foreach ($bodyComponents as $bodyComponent) {
             if (empty($bodyComponent)) {
                 continue;
             }
 
             list($bufferHeaders, $bufferValue) = explode("\r\n\r\n", $bodyComponent, 2);
+            $bufferValue = rtrim($bufferValue, "\r\n");
 
             if ($this->followIni && $request->server['REQUEST_METHOD'] === 'POST' && PhpIniUtil::checkPostBodyExceed($bufferValue)) {
                 throw new HttpPackageTooLongException("Post body size exceed.");
@@ -282,22 +287,26 @@ class Parser implements ParserContract
             }
 
             if (isset($parsedBufferHeader['filename'])) {
-                $request->files[$parsedBufferHeader['name']] = [
+                $files[$parsedBufferHeader['name']] = [
                     'filename' => $parsedBufferHeader['filename'],
                     'size' => strlen($bufferValue),
                     'content' => trim($bufferValue)
                 ];
 
                 if ($this->followIni && PhpIniUtil::checkUploadedBodyExceed($bufferValue)) {
-                    $request->files[$parsedBufferHeader['name']]['error'] = UPLOAD_ERR_INI_SIZE;
+                    $files[$parsedBufferHeader['name']]['error'] = UPLOAD_ERR_INI_SIZE;
                 } else {
-                    $request->files[$parsedBufferHeader['name']]['error'] = UPLOAD_ERR_OK;
+                    $files[$parsedBufferHeader['name']]['error'] = UPLOAD_ERR_OK;
                 }
 
                 if (isset($parsedBufferHeader['type'])) {
-                    $request->files[$parsedBufferHeader['name']]['type'] = $parsedBufferHeader['type'];
+                    $files[$parsedBufferHeader['name']]['type'] = $parsedBufferHeader['type'];
                 }
             } else {
+                if ($parsedBufferHeader['name'] === 'MAX_FILE_SIZE') {
+                    $htmlMaxFileSize = (int)trim($bufferValue);
+                }
+
                 if ($request->server['REQUEST_METHOD'] === 'POST') {
                     $request->post[$parsedBufferHeader['name']] = $bufferValue;
                 } else {
@@ -305,5 +314,15 @@ class Parser implements ParserContract
                 }
             }
         }
+
+        if (!is_null($htmlMaxFileSize)) {
+            foreach ($files as &$file) {
+                if ($file['size'] > $htmlMaxFileSize && $file['error'] === UPLOAD_ERR_OK) {
+                    $file['error'] = UPLOAD_ERR_FORM_SIZE;
+                }
+            }
+        }
+
+        $request->files = array_merge($request->files, $files);
     }
 }

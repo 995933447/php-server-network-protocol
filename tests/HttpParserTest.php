@@ -11,11 +11,11 @@ class HttpParserTest extends \PHPUnit\Framework\TestCase
         $parser = new \Bobby\ServerNetworkProtocol\Http\Parser($options);
         $formData = <<<str
 --boundary
-Content-Disposition: form-data; name="field1"
+Content-Disposition: form-data; name="field"
 
 value1
 --boundary
-Content-Disposition: form-data; name="field2"; filename="example.txt"
+Content-Disposition: form-data; name="file"; filename="example.txt"
 Content-Type: plain/text
 
 value2
@@ -37,6 +37,12 @@ str;
         $requests = $parser->decode();
         foreach ($requests as $request) {
             var_dump($request->files);
+        }
+
+        foreach ($requests as $request) {
+            $request->compressToEnv();
+            var_dump($_FILES);
+            var_dump($_POST);
         }
     }
 
