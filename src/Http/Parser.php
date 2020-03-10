@@ -144,6 +144,7 @@ class Parser implements ParserContract
 
             list($headerName, $headerValues) = explode(':', $headerLine, 2);
             $headerValues = trim($headerValues);
+
             foreach (explode(',', $headerValues) as $headerValue) {
                 if ($headerValue === '') {
                     continue;
@@ -164,6 +165,7 @@ class Parser implements ParserContract
                     break;
                 case 'HTTP_COOKIE':
                     parse_str(str_replace(';', '&', $headerValues), $request->cookie);
+                    $request->header[$headerName] = $request->cookie;
                     break;
                 case 'HTTP_CONTENT_TYPE':
                     if ($valuePosition = strpos($headerValues, ';')) {
@@ -254,7 +256,7 @@ class Parser implements ParserContract
             list($bufferHeaders, $bufferValue) = explode("\r\n\r\n", $bodyComponent, 2);
             $bufferValue = rtrim($bufferValue, "\r\n");
 
-            if ($this->followIni && $request->server['REQUEST_METHOD'] === 'POST' && PhpIniUtil::checkPostBodyExceed($bufferValue)) {
+            if ($this->followIni && PhpIniUtil::checkPostBodyExceed($bufferValue)) {
                 throw new HttpPackageTooLongException("Post body size exceed.");
             }
 
@@ -288,7 +290,7 @@ class Parser implements ParserContract
 
             if (isset($parsedBufferHeader['filename'])) {
                 $files[$parsedBufferHeader['name']] = [
-                    'filename' => $parsedBufferHeader['filename'],
+                    'name' => $parsedBufferHeader['filename'],
                     'size' => strlen($bufferValue),
                     'content' => trim($bufferValue)
                 ];
@@ -307,11 +309,7 @@ class Parser implements ParserContract
                     $htmlMaxFileSize = (int)trim($bufferValue);
                 }
 
-                if ($request->server['REQUEST_METHOD'] === 'POST') {
-                    $request->post[$parsedBufferHeader['name']] = $bufferValue;
-                } else {
-                    $request->request[$parsedBufferHeader['name']] = $bufferValue;
-                }
+                $request->post[$parsedBufferHeader['name']] = $bufferValue;
             }
         }
 

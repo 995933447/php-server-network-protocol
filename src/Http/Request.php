@@ -27,8 +27,9 @@ class Request
 
         $_SERVER = $this->server;
         $_GET = $this->get;
-        $GLOBALS['HTTP_RAW_POST_DATA'] = $_POST = $this->post;
-        $GLOBALS['HTTP_RAW_REQUEST_DATA'] = $_REQUEST = $this->request;
+        $GLOBALS['HTTP_RAW_POST_DATA'] = $GLOBALS['HTTP_RAW_REQUEST_DATA'] = $this->rawContent;
+        $_POST = $this->post;
+        $_REQUEST = $this->request;
         $_COOKIE = $this->cookie;
         $_FILES = $this->files;
     }
