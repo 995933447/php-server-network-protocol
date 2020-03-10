@@ -31,9 +31,13 @@ function get_field_name(string $key)
     return substr($key, 0, strpos($key, '['));
 }
 
-$res1 = convert_string_field_to_array($field1 = "file[0][0][1]", [
+$res1 = convert_string_field_to_array("file[3][]", [
     'filename' => '1.txt',
-    'type' => 'text'
+    'type' => 'text',
+    'size' => 12
 ]);
-$res2 = convert_string_field_to_array($field2 = "file[0][0][2]", 'pass');
-var_dump($res1, $res2);
+$res2 = convert_string_field_to_array($field2 = "file[1][]", 'pass');
+$res3 = convert_string_field_to_array("file[2][]", 'user');
+
+var_dump(array_merge_recursive($res1, $res2, $res3));
+var_dump($res1 + $res2 + $res3);

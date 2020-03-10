@@ -132,6 +132,7 @@ class Parser implements ParserContract
         $request->server = $server;
         $request->server['REQUEST_TIME'] = time();
         $request->server['REQUEST_TIME_FLOAT'] = microtime(true);
+        $request->server['CONTENT_LENGTH'] = $bodyLength;
 
         $request->rawContent = $body;
         $request->rawMessage = $headersLine . "\r\n\r\n" . $body;
