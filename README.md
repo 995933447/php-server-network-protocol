@@ -90,6 +90,9 @@ Bobby\ServerNetworkProtocol\Http\Request包含以下属性和方法:
 ***public $rawMessage;***
 获取原始的HTTP数据包内容，为字符串格式。
 
+***public $uploadedFileTempName;***
+调用compressToEnv()方法后生成的$_FILES的临时文件的集合，可用于常驻进程下手动清除临时文件
+
 ***public function compressToEnv()***\
 将相关属性的值设置到$_SERVER,$_GET,$_POST,$_REQUEST,$GLOBALS以及$_FILES。
 
