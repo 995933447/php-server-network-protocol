@@ -3,6 +3,7 @@ namespace Bobby\ServerNetworkProtocol\Http;
 
 use Bobby\ServerNetworkProtocol\PhpIniUtil;
 use Bobby\ServerNetworkProtocol\ParserContract;
+use Bobby\ServerNetworkProtocol\Utils\ArrayHelper;
 use InvalidArgumentException;
 
 class Parser implements ParserContract
@@ -146,17 +147,12 @@ class Parser implements ParserContract
             list($headerName, $headerValues) = explode(':', $headerLine, 2);
             $headerValues = trim($headerValues);
 
-            foreach (explode(',', $headerValues) as $headerValue) {
-                if ($headerValue === '') {
-                    continue;
-                }
-                $request->header[$headerName][] = $headerValue;
-            }
+            $request->header[$headerName] = $headerValues;
 
             $request->server[$serverName = ('HTTP_' . str_replace('-', '_', strtoupper($headerName)))] = $headerValues;
 
-            switch ($serverName) {
-                case 'HTTP_HOST':
+            switch (strtolower($headerName)) {
+                case 'host':
                     if (strpos($headerValues, ':')) {
                         list($request->server['SERVER_NAME'], $request->server['SERVER_PORT']) = explode(':', $headerValues, 2);
                     } else {
@@ -164,16 +160,22 @@ class Parser implements ParserContract
                         $request->server['SERVER_PORT'] = (string)80;
                     }
                     break;
-                case 'HTTP_COOKIE':
+                case 'cookie':
                     parse_str(str_replace(';', '&', $headerValues), $request->cookie);
-                    $request->header[$headerName] = $request->cookie;
                     break;
-                case 'HTTP_CONTENT_TYPE':
+                case 'content-type':
                     if ($valuePosition = strpos($headerValues, ';')) {
                         $request->server['CONTENT_TYPE'] = substr($headerValues, 0, $valuePosition);
                     } else {
                         $request->server['CONTENT_TYPE'] = $headerValues;
                     }
+                    break;
+                case 'content-length':
+                case 'php-auth-user':
+                case 'php-auth-pw':
+                case 'php-auth-digest':
+                case 'auth-type':
+                    $request->server[str_replace('-', '_', strtoupper($headerName))] = $headerValues;
             }
         }
 
@@ -249,6 +251,7 @@ class Parser implements ParserContract
 
         $htmlMaxFileSize = null;
         $files = [];
+        $post = [];
         foreach ($bodyComponents as $bodyComponent) {
             if (empty($bodyComponent)) {
                 continue;
@@ -289,39 +292,82 @@ class Parser implements ParserContract
                 }
             }
 
-            if (isset($parsedBufferHeader['filename'])) {
-                $files[$parsedBufferHeader['name']] = [
-                    'name' => $parsedBufferHeader['filename'],
-                    'size' => strlen($bufferValue),
-                    'content' => trim($bufferValue)
-                ];
-
-                if ($this->followIni && PhpIniUtil::checkUploadedBodyExceed($bufferValue)) {
-                    $files[$parsedBufferHeader['name']]['error'] = UPLOAD_ERR_INI_SIZE;
-                } else {
-                    $files[$parsedBufferHeader['name']]['error'] = UPLOAD_ERR_OK;
-                }
-
-                if (isset($parsedBufferHeader['type'])) {
-                    $files[$parsedBufferHeader['name']]['type'] = $parsedBufferHeader['type'];
-                }
-            } else {
+            if (!isset($parsedBufferHeader['filename'])) {
                 if ($parsedBufferHeader['name'] === 'MAX_FILE_SIZE') {
                     $htmlMaxFileSize = (int)trim($bufferValue);
                 }
 
-                $request->post[$parsedBufferHeader['name']] = $bufferValue;
+                $post[] = ['field' => $parsedBufferHeader['name'], 'value' => $bufferValue];
+            } else {
+                $file = [
+                    'filename' => $parsedBufferHeader['filename'],
+                    'size' => strlen($bufferValue),
+                    'content' => trim($bufferValue),
+                ];
+
+                if ($this->followIni && PhpIniUtil::checkUploadedBodyExceed($bufferValue)) {
+                    $file['error'] = UPLOAD_ERR_INI_SIZE;
+                } else {
+                    $file['error'] = UPLOAD_ERR_OK;
+                }
+
+                if (isset($parsedBufferHeader['type'])) {
+                    $file['type'] = $parsedBufferHeader['type'];
+                }
+
+                $files[] = [
+                    'field' => $parsedBufferHeader['name'],
+                    'value' => $file
+                ];
             }
         }
 
         if (!is_null($htmlMaxFileSize)) {
             foreach ($files as &$file) {
-                if ($file['size'] > $htmlMaxFileSize && $file['error'] === UPLOAD_ERR_OK) {
-                    $file['error'] = UPLOAD_ERR_FORM_SIZE;
+                if ($file['value']['size'] > $htmlMaxFileSize && $file['value']['error'] === UPLOAD_ERR_OK) {
+                    $file['value']['error'] = UPLOAD_ERR_FORM_SIZE;
                 }
             }
         }
 
-        $request->files = array_merge($request->files, $files);
+        foreach ($post as $postComponent) {
+            $this->setParsedFormDataValue($request, $postComponent['field'], $postComponent['value'], false);
+        }
+        foreach ($files as $file) {
+            $this->setParsedFormDataValue($request, $file['field'], $file['value'], true);
+        }
+    }
+
+    protected function setParsedFormDataValue(Request $request, string $fieldName, $value, bool $isFile)
+    {
+        if (!$this->isArrayField($fieldName)) {
+            if (!$isFile) {
+                $request->post[$fieldName] = $value;
+            } else {
+                $request->files[$fieldName] = $value;
+            }
+        } else {
+            $validFieldName = $this->getArrayFieldName($fieldName);
+            $queries = substr($fieldName, strlen($validFieldName));
+
+            if (!$isFile) {
+                ArrayHelper::queryMultidimensionalSet($request->post, "[$validFieldName]$queries", $value);
+            } else {
+                ArrayHelper::queryMultidimensionalSet($request->files, "[$validFieldName][name]$queries", $value['filename']);
+                ArrayHelper::queryMultidimensionalSet($request->files, "[$validFieldName][content]$queries", $value['content']);
+                ArrayHelper::queryMultidimensionalSet($request->files, "[$validFieldName][error]$queries", $value['error']);
+                ArrayHelper::queryMultidimensionalSet($request->files, "[$validFieldName][size]$queries", $value['size']);
+            }
+        }
+    }
+
+    protected function isArrayField(string $fieldName): bool
+    {
+        return strpos($fieldName, '[') !== false && $fieldName{strlen($fieldName) - 1} === ']';
+    }
+
+    protected function getArrayFieldName(string $fieldName): string
+    {
+        return substr($fieldName, 0, strpos($fieldName, '['));
     }
 }

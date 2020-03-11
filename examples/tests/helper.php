@@ -1,43 +1,38 @@
 <?php
-$arr = ['file[]', 'file[1]', 'file[]'];
 
-function convert_string_field_to_array(string $key, $value)
+function query_multidimensional_array_set(&$array, $query, $value)
 {
-    $firstKey = substr($key, 0, strpos($key, '['));
-    $temp = substr(substr($key, strpos($key, '[') + 1), 0, -1);
-    $subKeys = explode('][', $temp);
-
-    $isFirst = true;
-    while (count($subKeys) > 0) {
-        $tempArr = [];
-
-        $finalKey = array_pop($subKeys)?: '0';
-
-        $finalKey = trim($finalKey, "\"");
-        $finalKey = trim($finalKey, "'");
-
-        $tempArr[$finalKey] = $value;
-        $value = $tempArr;
-    }
-
-    return [$firstKey => $value];
+    $query = substr($query, 1, -1);
+    $queries = explode('][', $query);
+    do_set($array, $queries, $value);
 }
 
-function get_field_name(string $key)
+function do_set(&$array, $queries, $value)
 {
-    if (strpos($key, '[') === false || strpos($key, ']') === false) {
-        return $key;
+    if (($query = $queries[0]) === '') {
+        $query = is_array($array)? count($array): 0;
     }
-    return substr($key, 0, strpos($key, '['));
+
+    if (count($queries) === 1) {
+        $array[$query] = $value;
+    } else {
+        if (!isset($array[$query])) {
+            $array[$query] = null;
+        }
+        array_shift($queries);
+        do_set($array[$query], $queries, $value);
+    }
 }
 
-$res1 = convert_string_field_to_array("file[3][]", [
-    'filename' => '1.txt',
-    'type' => 'text',
-    'size' => 12
-]);
-$res2 = convert_string_field_to_array($field2 = "file[1][]", 'pass');
-$res3 = convert_string_field_to_array("file[2][]", 'user');
+$arr = [];
 
-var_dump(array_merge_recursive($res1, $res2, $res3));
-var_dump($res1 + $res2 + $res3);
+query_multidimensional_array_set($arr, '[file][name][][][]', 888);
+query_multidimensional_array_set($arr, '[file][name][0][0][]', 666);
+query_multidimensional_array_set($arr, '[file][name][1]', 555);
+query_multidimensional_array_set($arr, '[file][name][][]', 123);
+query_multidimensional_array_set($arr, '[file][name][0][1]', 234);
+query_multidimensional_array_set($arr, '[file][name][0][2]', 345);
+query_multidimensional_array_set($arr, '[file][name][0][]', 567);
+
+
+var_dump($arr);

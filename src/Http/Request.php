@@ -1,6 +1,8 @@
 <?php
 namespace Bobby\ServerNetworkProtocol\Http;
 
+use Bobby\ServerNetworkProtocol\Utils\ArrayHelper;
+
 class Request
 {
     public $server = [];
@@ -21,9 +23,14 @@ class Request
 
     public $rawMessage;
 
+    public $uploadedFileTempName = [];
+
     public function compressToEnv()
     {
-        $this->uploadFiles();
+        $_SERVER = $_GET = $_POST = $_REQUEST = $_FILES = [];
+        $GLOBALS['HTTP_RAW_POST_DATA'] = $GLOBALS['HTTP_RAW_REQUEST_DATA'] = '';
+
+        $this->setGlobalFiles();
 
         $_SERVER = $this->server;
         $_GET = $this->get;
@@ -31,33 +38,43 @@ class Request
         $_POST = $this->post;
         $_REQUEST = $this->request;
         $_COOKIE = $this->cookie;
-        $_FILES = $this->files;
     }
 
-    protected function uploadFiles()
+    protected function setGlobalFiles()
     {
         set_error_handler(function () {});
 
-        foreach ($this->files as $name => &$file) {
-            $file['tmp_name'] = '';
+        foreach ($this->files as $name => $file) {
+            ArrayHelper::convertKeyToOneDepth($file['content'], '', $contentQueries);
 
-            if ($file['error'] === UPLOAD_ERR_OK) {
-                if (!$tmpFile = tmpfile()) {
-                    $file['error'] = UPLOAD_ERR_CANT_WRITE;
-                } else {
-                    $written = fwrite($tmpFile, $file['content']);
-                    if ($written === false || $written === 0) {
-                        $file['error'] = UPLOAD_ERR_CANT_WRITE;
+            foreach ($contentQueries as $query => $content) {
+                ArrayHelper::queryMultidimensionalSet($file['tmp_name'], $query, '');
+
+                if (ArrayHelper::queryMultidimensional($file['error'], $query) === UPLOAD_ERR_OK) {
+                    if (!$tmpFile = tmpfile()) {
+                        ArrayHelper::queryMultidimensionalSet($file['error'], $query, UPLOAD_ERR_CANT_WRITE);
                     } else {
-                        $file['tmp_name'] = stream_get_meta_data($tmpFile)['uri'];
-                        if ($written < $file['size']) {
-                            $file['error'] = UPLOAD_ERR_PARTIAL;
+                        $written = fwrite($tmpFile, $content);
+                        if ($written === false || $written === 0) {
+                            ArrayHelper::queryMultidimensionalSet($file['error'], $query, UPLOAD_ERR_CANT_WRITE);
+                        } else {
+                            if ($written < (int)ArrayHelper::queryMultidimensional($file['size'], $query)) {
+                                ArrayHelper::queryMultidimensionalSet($file['error'], $query, UPLOAD_ERR_PARTIAL);
+                            }
+
+                            ArrayHelper::queryMultidimensionalSet($file['tmp_name'], $query, $tempName = stream_get_meta_data($tmpFile)['uri']);
+                            $this->uploadedFileTempName[ArrayHelper::queryMultidimensional($file['name'], $query)] = $tempName;
                         }
                     }
                 }
             }
 
-            unset($file['content']);
+            $_FILES[$name] = [
+              'name' => $file['name'],
+              'size' => $file['size'],
+              'tmp_name' => $file['tmp_name'],
+              'error' => $file['error']
+            ];
         }
 
         restore_error_handler();

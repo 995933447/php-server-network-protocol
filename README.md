@@ -96,6 +96,7 @@ Bobby\ServerNetworkProtocol\Http\Request包含以下属性和方法:
 **Bobby\ServerNetworkProtocol\Websocket\Parser::decode()**\
 返回一个Bobby\ServerNetworkProtocol\Websocket\Frame对象数组。Bobby\ServerNetworkProtocol\Websocket\Frame对象是websocket数据帧的值对象。通过$frame->payloadData可获取传入数据帧承载的数据。
 ### 示例：
+解析TCP通信数据
 ```php
 $config = [
     'open_length_check' => true, // 可选,开启长度检查。开启该选项后以下选项如无特殊说明都是必选选项。
@@ -156,4 +157,49 @@ var_dump($parser2->decode());
       string(13) "I am a PHPer!"
     }
     */
+```
+解析http form-data消息:
+```php
+<?php
+require __DIR__ . '/../../vendor/autoload.php';
+
+$parser = new \Bobby\ServerNetworkProtocol\Http\Parser();
+
+$body = <<<EOF
+-----------------------------20896060251896012921717172737
+Content-Disposition: form-data; name="file[][]"; filename="file1.txt"
+Content-Type: text/plain-file1
+
+fghjkltyuikolyuioghjk@#$%^&*sss
+-----------------------------20896060251896012921717172737
+Content-Disposition: form-data; name="file[2][]"; filename="file2.txt"
+Content-Type: text/plain-file2
+
+hello world!
+-----------------------------20896060251896012921717172737
+Content-Disposition: form-data; name="file[0][]"; filename="file3.txt"
+Content-Type: text/plain-file3
+
+I am a phper!
+-----------------------------20896060251896012921717172737--
+EOF;
+
+$bodyLength = strlen($body);
+
+$buffer = <<<str
+POST /test.html HTTP/1.1
+Host: example.org
+Content-Length: $bodyLength
+Content-Type: multipart/form-data;boundary="---------------------------20896060251896012921717172737"
+str;
+
+$parser->input($buffer);
+$parser->input("\r\n\r\n");
+$parser->input($body);
+
+$requests = $parser->decode();
+foreach ($requests as $request) {
+    $request->compressToEnv();
+    var_dump($_FILES, $_SERVER);
+}
 ```

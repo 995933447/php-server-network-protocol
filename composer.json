@@ -3,7 +3,8 @@
     "description": "Server network protocol parsers",
     "type": "library",
     "require": {
-        "ext-json": "*"
+        "ext-json": "*",
+        "bobby/array-special-helper": "*"
     },
     "license": "MIT",
     "authors": [
