@@ -203,7 +203,7 @@ foreach ($requests as $request) {
     var_dump($_FILES, $_SERVER);
 }
 //output
-/**
+/*
 * array(1) {
     ["file"]=>
     array(4) {
