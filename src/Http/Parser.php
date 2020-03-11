@@ -3,8 +3,8 @@ namespace Bobby\ServerNetworkProtocol\Http;
 
 use Bobby\ServerNetworkProtocol\PhpIniUtil;
 use Bobby\ServerNetworkProtocol\ParserContract;
-use Bobby\ServerNetworkProtocol\Utils\ArrayHelper;
 use InvalidArgumentException;
+use Bobby\ArraySpecialHelper\ArrayHelper;
 
 class Parser implements ParserContract
 {

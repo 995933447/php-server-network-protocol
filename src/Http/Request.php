@@ -1,7 +1,7 @@
 <?php
 namespace Bobby\ServerNetworkProtocol\Http;
 
-use Bobby\ServerNetworkProtocol\Utils\ArrayHelper;
+use Bobby\ArraySpecialHelper\ArrayHelper;
 
 class Request
 {

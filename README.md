@@ -202,4 +202,102 @@ foreach ($requests as $request) {
     $request->compressToEnv();
     var_dump($_FILES, $_SERVER);
 }
+//output
+/**
+* array(1) {
+    ["file"]=>
+    array(4) {
+      ["name"]=>
+      array(2) {
+        [0]=>
+        array(2) {
+          [0]=>
+          string(9) "file1.txt"
+          [1]=>
+          string(9) "file3.txt"
+        }
+        [2]=>
+        array(1) {
+          [0]=>
+          string(9) "file2.txt"
+        }
+      }
+      ["size"]=>
+      array(2) {
+        [0]=>
+        array(2) {
+          [0]=>
+          int(31)
+          [1]=>
+          int(13)
+        }
+        [2]=>
+        array(1) {
+          [0]=>
+          int(12)
+        }
+      }
+      ["tmp_name"]=>
+      array(2) {
+        [0]=>
+        array(2) {
+          [0]=>
+          string(42) "C:\Users\PC\AppData\Local\Temp\php6B12.tmp"
+          [1]=>
+          string(42) "C:\Users\PC\AppData\Local\Temp\php6B13.tmp"
+        }
+        [2]=>
+        array(1) {
+          [0]=>
+          string(42) "C:\Users\PC\AppData\Local\Temp\php6B14.tmp"
+        }
+      }
+      ["error"]=>
+      array(2) {
+        [0]=>
+        array(2) {
+          [0]=>
+          int(0)
+          [1]=>
+          int(0)
+        }
+        [2]=>
+        array(1) {
+          [0]=>
+          int(0)
+        }
+      }
+    }
+  }
+  array(13) {
+    ["REQUEST_METHOD"]=>
+    string(4) "POST"
+    ["REQUEST_URI"]=>
+    string(10) "/test.html"
+    ["SERVER_PROTOCOL"]=>
+    string(3) "1.1"
+    ["REQUEST_TIME"]=>
+    int(1583903787)
+    ["REQUEST_TIME_FLOAT"]=>
+    float(1583903787.4804)
+    ["CONTENT_LENGTH"]=>
+    string(3) "619"
+    ["HTTP_HOST"]=>
+    string(11) "example.org"
+    ["SERVER_NAME"]=>
+    string(11) "example.org"
+    ["SERVER_PORT"]=>
+    string(2) "80"
+    ["HTTP_CONTENT_LENGTH"]=>
+    string(3) "619"
+    ["HTTP_CONTENT_TYPE"]=>
+    string(87) "multipart/form-data;boundary="---------------------------20896060251896012921717172737""
+    ["CONTENT_TYPE"]=>
+    string(19) "multipart/form-data"
+    ["QUERY_STRING"]=>
+    string(0) ""
+  }
+  
+
+ */
 ```

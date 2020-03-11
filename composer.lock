@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "699253705bef38225c6998c022ad6c53",
+    "content-hash": "4d377449dd932c9ba974fddbea6dd79a",
     "packages": [
         {
             "name": "bobby/array-special-helper",
@@ -12,15 +12,20 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/995933447/array-speical-helper.git",
-                "reference": "3a0d0c7fc6b5559e6be23a01c95a44207724ae1a"
+                "reference": "d2cb309e210399ee89aa53302f86c35dffaf9f2b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/995933447/array-speical-helper/zipball/3a0d0c7fc6b5559e6be23a01c95a44207724ae1a",
-                "reference": "3a0d0c7fc6b5559e6be23a01c95a44207724ae1a",
+                "url": "https://api.github.com/repos/995933447/array-speical-helper/zipball/d2cb309e210399ee89aa53302f86c35dffaf9f2b",
+                "reference": "d2cb309e210399ee89aa53302f86c35dffaf9f2b",
                 "shasum": ""
             },
             "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Bobby\\ArraySpecialHelper\\": "src/"
+                }
+            },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
@@ -31,8 +36,8 @@
                     "email": "995933447@qq.com"
                 }
             ],
-            "description": "some special algorithm to help you use array",
-            "time": "2020-03-11T04:26:41+00:00"
+            "description": "Some special algorithm help to use array",
+            "time": "2020-03-11T05:04:58+00:00"
         }
     ],
     "packages-dev": [
