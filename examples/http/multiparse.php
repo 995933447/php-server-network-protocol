@@ -24,12 +24,12 @@ EOF;
 
 $bodyLength = strlen($body);
 
-$buffer = <<<str
+$buffer = <<<EOF
 POST /test.html HTTP/1.1
 Host: example.org
 Content-Length: $bodyLength
 Content-Type: multipart/form-data;boundary="---------------------------20896060251896012921717172737"
-str;
+EOF;
 
 $parser->input($buffer);
 $parser->input("\r\n\r\n");

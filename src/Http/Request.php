@@ -23,7 +23,7 @@ class Request
 
     public $rawMessage;
 
-    public $uploadedFileTempName = [];
+    public $uploadedFileTempNames = [];
 
     public function compressToEnv()
     {
@@ -63,7 +63,7 @@ class Request
                             }
 
                             ArrayHelper::queryMultidimensionalSet($file['tmp_name'], $query, $tempName = stream_get_meta_data($tmpFile)['uri']);
-                            $this->uploadedFileTempName[ArrayHelper::queryMultidimensional($file['name'], $query)] = $tempName;
+                            $this->uploadedFileTempNames[ArrayHelper::queryMultidimensional($file['name'], $query)] = $tempName;
                         }
                     }
                 }
