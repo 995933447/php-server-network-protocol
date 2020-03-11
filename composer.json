@@ -4,7 +4,7 @@
     "type": "library",
     "require": {
         "ext-json": "*",
-        "bobby/array-special-helper": "*"
+        "bobby/array-special-helper": "master-dev"
     },
     "license": "MIT",
     "authors": [
