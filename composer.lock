@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4d377449dd932c9ba974fddbea6dd79a",
+    "content-hash": "699253705bef38225c6998c022ad6c53",
     "packages": [
         {
             "name": "bobby/array-special-helper",
