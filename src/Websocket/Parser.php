@@ -52,63 +52,59 @@ class Parser implements ParserContract
             throw new InvalidFrameException();
         }
 
-        $isMasked = true; // 客户端请求服务端需要设置屏蔽码， buff mask必须位1个Bit的1,反之不需要设置
         $payloadLenDescBytes = 0;
-        $payloadLen = 0;
-        $maskingKey = [];
-        $payloadData = '';
 
-        if (in_array($opcode, [OpcodeEnum::TEXT, OpcodeEnum::BINARY, OpcodeEnum::SEGMENT])) {
-            if (($payloadLen = (hexdec(substr($message, 2, 2)) & 127)) < 126) {
-                $maskingKeyStart = 1+ 1 + 2;
-            } else {
-                switch ($payloadLen) {
-                    case 126:
-                        $payloadLenDescBytes = 16 / 4;
-                        break;
-                    default:
-                        $payloadLenDescBytes = 64 / 4;
-                }
-
-                if ($messageLen < (Frame::MIN_FRAME_HEX_LENGTH + $payloadLenDescBytes)) {
-                    return null;
-                }
-
-                $payloadLen = hexdec(substr($message, 4, $payloadLenDescBytes)); // 如果payload len为126 则取后面16位表示payload data的长度,如果127则用后面64位表示
-                $maskingKeyStart = 1 + 1 + 2 + $payloadLenDescBytes; // FIN,RSV1,RSV2,Rsv3 + OPCODE+ MASK,PAYLOAD LEN + EXTEND PAYLOAD LEN
+        if (($payloadLen = (hexdec(substr($message, 2, 2)) & 127)) < 126) {
+            $maskingKeyStart = 1 + 1 + 2;
+        } else {
+            switch ($payloadLen) {
+                case 126:
+                    $payloadLenDescBytes = 16 / 4;
+                    break;
+                default:
+                    $payloadLenDescBytes = 64 / 4;
             }
 
-            if ($messageLen < ($completeFrameLen = Frame::MIN_FRAME_HEX_LENGTH + $payloadLenDescBytes + $payloadLen * 2)) {
+            if ($messageLen < (Frame::MIN_FRAME_HEX_LENGTH + $payloadLenDescBytes)) {
                 return null;
             }
 
-            $message = substr($message, 0, $completeFrameLen);
-            $this->receiveBuffer = pack('H*', substr($message, $completeFrameLen));
+            $payloadLen = hexdec(substr($message, 4, $payloadLenDescBytes)); // 如果payload len为126 则取后面16位表示payload data的长度,如果127则用后面64位表示
+            $maskingKeyStart = 1 + 1 + 2 + $payloadLenDescBytes; // FIN,RSV1,RSV2,Rsv3 + OPCODE+ MASK,PAYLOAD LEN + EXTEND PAYLOAD LEN
+        }
 
-            for ($i = 0; $i < 4; $i++) {
-                $maskingKey[] = hexdec(substr($message, $maskingKeyStart + $i * 2, 2)); // 截取32位屏蔽码
+        if ($messageLen < ($completeFrameLen = Frame::MIN_FRAME_HEX_LENGTH + $payloadLenDescBytes + $payloadLen * 2)) {
+            return null;
+        }
+
+        $message = substr($message, 0, $completeFrameLen);
+        $this->receiveBuffer = pack('H*', substr($message, $completeFrameLen));
+
+        $maskingKey = [];
+        for ($i = 0; $i < 4; $i++) {
+            $maskingKey[] = hexdec(substr($message, $maskingKeyStart + $i * 2, 2)); // 截取32位屏蔽码
+        }
+
+        $payloadData = '';
+        for ($payloadDataStart = $maskingKeyStart + 32 / 4, $n = 0; $payloadDataStart < strlen($message); $payloadDataStart += 2, $n++) {
+            $payloadData .= chr(hexdec(substr($message, $payloadDataStart, 2)) ^ $maskingKey[$n % 4]);
+        }
+
+        if ($finWith3Rsv == FinWith3RsvEnum::NO_FINISH || $opcode == OpcodeEnum::SEGMENT) {
+            $lastSegmentPayloadData = $this->segmentPayloads;
+
+            if ($finWith3Rsv == FinWith3RsvEnum::NO_FINISH) {
+                $this->segmentPayloads = $lastSegmentPayloadData . $this->segmentPayloads;
+                return null;
             }
 
-            for($payloadDataStart = $maskingKeyStart + 32 / 4, $n = 0; $payloadDataStart < strlen($message); $payloadDataStart += 2, $n++) {
-                $payloadData .= chr(hexdec(substr($message, $payloadDataStart, 2)) ^ $maskingKey[$n % 4]);
-            }
-
-            if ($finWith3Rsv == FinWith3RsvEnum::NO_FINISH || $opcode == OpcodeEnum::SEGMENT) {
-                $lastSegmentPayloadData = $this->segmentPayloads;
-
-                if ($finWith3Rsv == FinWith3RsvEnum::NO_FINISH) {
-                    $this->segmentPayloads = $lastSegmentPayloadData . $this->segmentPayloads;
-                    return null;
-                }
-
-                if ($opcode == OpcodeEnum::SEGMENT) {
-                    $this->segmentPayloads = '';
-                    $payloadData = $lastSegmentPayloadData . $payloadData;
-                }
+            if ($opcode == OpcodeEnum::SEGMENT) {
+                $this->segmentPayloads = '';
+                $payloadData = $lastSegmentPayloadData . $payloadData;
             }
         }
 
-        return new Frame($finWith3Rsv, $opcode, $isMasked, $payloadLen, $maskingKey, $payloadData);
+        return new Frame($finWith3Rsv, $opcode, true, $payloadLen, $maskingKey, $payloadData);
     }
 
     public function getBuffer(): string
