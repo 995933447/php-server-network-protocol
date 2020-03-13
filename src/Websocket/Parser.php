@@ -34,6 +34,30 @@ class Parser implements ParserContract
 
     protected function parseBuffer(): ?Frame
     {
+        $message = unpack('H*', $this->receiveBuffer)[1];
+
+        if (($messageLen = strlen($message)) < Frame::MIN_FRAME_HEX_LENGTH) {
+            return null;
+        }
+
+        $finWith3Rsv = substr($message, 0, 1);
+        $validFinWith3RsvEnum = (new \ReflectionClass(new FinWith3RsvEnum()))->getConstants();
+        if (!in_array($finWith3Rsv, array_values($validFinWith3RsvEnum))) {
+            throw new InvalidFrameException();
+        }
+
+        $opcode = substr($message, 1, 1);
+        $validOpcode = (new \ReflectionClass(new OpcodeEnum()))->getConstants();
+        if (!in_array($opcode, array_values($validOpcode))) {
+            throw new InvalidFrameException();
+        }
+
+        $isMasked = true; // 客户端请求服务端需要设置屏蔽码， buff mask必须位1个Bit的1,反之不需要设置
+        $payloadLenDescBytes = 0;
+        $payloadLen = 0;
+        $maskingKey = [];
+        $payloadData = '';
+
         if (($payloadLen = (hexdec(substr($message, 2, 2)) & 127)) < 126) {
             $maskingKeyStart = 1+ 1 + 2;
         } else {
