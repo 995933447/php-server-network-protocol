@@ -96,7 +96,7 @@ class Parser implements ParserContract
             $lastSegmentPayloadData = $this->segmentPayloads;
 
             if ($finWith3Rsv == FinWith3RsvEnum::NO_FINISH) {
-                $this->segmentPayloads = $lastSegmentPayloadData . $this->segmentPayloads;
+                $this->segmentPayloads = $lastSegmentPayloadData . $payloadData;
                 return null;
             }
 
